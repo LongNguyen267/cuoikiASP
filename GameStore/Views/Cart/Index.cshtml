@@ -1,0 +1,69 @@
+﻿@using GameStore.Models // Thêm dòng này
+@model List<GameStore.Models.CartItem> // Sửa dòng này
+
+
+@{
+    ViewData["Title"] = "Giỏ hàng của bạn";
+    decimal total = 0;
+}
+
+<div class="cart-overlay active" style="display: flex;">
+    <div class="cart-popup">
+        <h3>Giỏ hàng của bạn</h3>
+        @if (Model.Count == 0)
+        {
+            <div id="cart-content">
+                <i class="fas fa-shopping-cart empty-cart-icon"></i>
+                <p class="empty-cart-text">Hiện chưa có sản phẩm</p>
+            </div>
+            <div class="total-section">
+                <h4>Tổng tiền:</h4>
+                <span class="total-price">0đ</span>
+            </div>
+        }
+        else
+        {
+            <div id="cart-content">
+                <table class="table text-start text-white">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Tổng cộng</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            if (item.Product != null)
+                            {
+                                var subtotal = item.Product.Price * item.Quantity;
+                                total += subtotal;
+                                <tr>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Product.Price.ToString("C")</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@subtotal.ToString("C")</td>
+                                    <td>
+                                        <a asp-controller="Cart" asp-action="RemoveFromCart" asp-route-productId="@item.ProductId" class="btn btn-sm btn-danger">Xóa</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="total-section">
+                <h4>Tổng tiền:</h4>
+                <span class="total-price">@total.ToString("C")</span>
+            </div>
+        }
+
+        <div class="button-group">
+            <a asp-controller="Products" asp-action="Index" class="btn-cart-action btn-view-cart">Tiếp tục mua sắm</a>
+            <a asp-action="Index" asp-controller="Checkout" class="btn-cart-action btn-checkout">Thanh toán</a>
+        </div>
+    </div>
+</div>

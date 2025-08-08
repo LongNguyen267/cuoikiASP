@@ -1,0 +1,151 @@
+﻿@model GameStore.ViewModels.CheckoutViewModel
+@using GameStore.Controllers
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    decimal total = 0;
+}
+
+<div class="checkout-container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Xác nhận đơn hàng</h1>
+            <hr />
+        </div>
+    </div>
+
+    @if (Model.CartItems.Count == 0)
+    {
+        <div class="alert alert-warning">
+            Giỏ hàng của bạn đang trống.
+        </div>
+    }
+    else
+    {
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Giá</th>
+                            <th>Số lượng</th>
+                            <th>Tổng cộng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CartItems)
+                        {
+                            if (item.Product != null)
+                            {
+                                var subtotal = item.Product.Price * item.Quantity;
+                                total += subtotal;
+                                <tr>
+                                    <td>@item.Product.Name</td>
+                                    <td>@item.Product.Price.ToString("C")</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@subtotal.ToString("C")</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+                <div class="text-end">
+                    <h4>Tổng tiền: @total.ToString("C")</h4>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <form asp-controller="Checkout" asp-action="PlaceOrder" method="post" id="checkout-form">
+                    <h3 class="mb-3">Thông tin giao hàng</h3>
+                    <div class="form-group mb-3">
+                        <label asp-for="ShippingAddress" class="control-label">Địa chỉ nhận hàng</label>
+                        <input asp-for="ShippingAddress" class="form-control" />
+                        <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="PhoneNumber" class="control-label">Số điện thoại</label>
+                        <input asp-for="PhoneNumber" class="form-control" />
+                        <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                    </div>
+
+                    <h3 class="mb-3">Chọn phương thức thanh toán</h3>
+                    <div class="form-group mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="cod" value="COD" checked />
+                            <label class="form-check-label" for="cod">Thanh toán khi nhận hàng</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="online" value="Online" />
+                            <label class="form-check-label" for="online">Thanh toán trực tuyến</label>
+                        </div>
+                    </div>
+
+                    <div id="online-payment-options" style="display:none;">
+                        <div class="form-group mb-3">
+                            <label>Chọn cổng thanh toán:</label>
+                            <div class="d-flex gap-3">
+                                <img src="https://via.placeholder.com/100x50?text=Momo" alt="Momo" id="momo-qr" class="payment-option border p-2 rounded" style="cursor:pointer;" />
+                                <img src="https://via.placeholder.com/100x50?text=Ngân+hàng" alt="Ngân hàng" id="banking-qr" class="payment-option border p-2 rounded" style="cursor:pointer;" />
+                                <img src="https://via.placeholder.com/100x50?text=ZaloPay" alt="ZaloPay" id="zalopay-qr" class="payment-option border p-2 rounded" style="cursor:pointer;" />
+                            </div>
+                        </div>
+                        <div id="qr-code-display" class="mt-3 text-center" style="display:none;">
+                            <h4>Quét mã QR để thanh toán</h4>
+                            <img id="qr-code-img" src="" alt="Mã QR thanh toán" style="max-width:200px;" />
+                            <p class="mt-2">Vui lòng quét mã và nhấn "Hoàn tất đặt hàng".</p>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success mt-3 w-100" id="complete-order-btn">Hoàn tất đặt hàng</button>
+                </form>
+            </div>
+        </div>
+    }
+
+    <div class="mt-3">
+        <a asp-action="Index" asp-controller="Cart">Quay lại giỏ hàng</a>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const onlinePaymentRadio = document.getElementById('online');
+            const codPaymentRadio = document.getElementById('cod');
+            const onlinePaymentOptions = document.getElementById('online-payment-options');
+            const qrCodeDisplay = document.getElementById('qr-code-display');
+            const qrCodeImg = document.getElementById('qr-code-img');
+
+            function toggleOnlineOptions() {
+                if (onlinePaymentRadio.checked) {
+                    onlinePaymentOptions.style.display = 'block';
+                } else {
+                    onlinePaymentOptions.style.display = 'none';
+                    qrCodeDisplay.style.display = 'none';
+                }
+            }
+
+            onlinePaymentRadio.addEventListener('change', toggleOnlineOptions);
+            codPaymentRadio.addEventListener('change', toggleOnlineOptions);
+
+            document.getElementById('momo-qr').addEventListener('click', function() {
+                qrCodeImg.src = 'https://via.placeholder.com/200x200?text=Momo+QR';
+                qrCodeDisplay.style.display = 'block';
+            });
+
+            document.getElementById('banking-qr').addEventListener('click', function() {
+                qrCodeImg.src = 'https://via.placeholder.com/200x200?text=Ngân+hàng+QR';
+                qrCodeDisplay.style.display = 'block';
+            });
+
+            document.getElementById('zalopay-qr').addEventListener('click', function() {
+                qrCodeImg.src = 'https://via.placeholder.com/200x200?text=ZaloPay+QR';
+                qrCodeDisplay.style.display = 'block';
+            });
+        });
+    </script>
+}

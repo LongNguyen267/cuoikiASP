@@ -1,0 +1,47 @@
+﻿@model GameStore.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/Login.css" asp-append-version="true" />
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Đăng nhập tài khoản</h2>
+        <hr />
+        <form asp-action="Login" class="auth-form">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password" class="control-label"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="form-group mt-2">
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="RememberMe" />
+                    <label class="form-check-label" asp-for="RememberMe">
+                        @Html.DisplayNameFor(m => m.RememberMe)
+                    </label>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <input type="submit" value="Đăng nhập" class="btn btn-primary" />
+            </div>
+        </form>
+        <div class="auth-link-box">
+            <p>Chưa có tài khoản? <a asp-action="Register">Đăng ký ngay</a>.</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

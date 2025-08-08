@@ -1,0 +1,22 @@
+﻿@model GameStore.Models.Order
+
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+}
+
+<h1>Đặt hàng thành công!</h1>
+
+<div class="alert alert-success" role="alert">
+    Đơn hàng của bạn đã được đặt thành công.
+</div>
+
+<p>
+    **Mã đơn hàng:** @Model.Id
+</p>
+<p>
+    **Ngày đặt hàng:** @Model.OrderDate?.ToString("dd/MM/yyyy")
+</p>
+
+<div class="mt-4">
+    <a asp-action="Index" asp-controller="Products" class="btn btn-primary">Tiếp tục mua sắm</a>
+</div>
