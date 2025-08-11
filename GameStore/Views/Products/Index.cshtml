@@ -1,0 +1,126 @@
+﻿@model IEnumerable<GameStore.Models.Product>
+
+@{
+    ViewData["Title"] = "Sản phẩm";
+}
+
+@* Nạp file CSS cho trang sản phẩm *@
+@section Styles {
+    <link rel="stylesheet" href="~/css/products.css" asp-append-version="true" />
+}
+
+@* ================================================== *@
+@* === PHẦN 1: HERO SECTION (Ảnh PS5 full màn hình) === *@
+@* ================================================== *@
+<section class="hero-product-page">
+    <div class="split-hero-container">
+        <div class="text-overlay-box">
+            <h2>Khám Phá Thế Giới Game Đỉnh Cao Cùng PlayStation 5</h2>
+            <p>Trải nghiệm tốc độ với ổ cứng SSD siêu nhanh và đắm chìm trong thế giới game sống động với đồ họa tuyệt đẹp.</p>
+        </div>
+        <img class="main-hero-image" src="/image/product/ps5products.jpg" alt="PS5">
+        <div class="product-overlay-box">
+            <p class="box-title">Sản phẩm nổi bật</p>
+            <a href="#" class="featured-product-link">
+                <img class="featured-product-image" src="/image/product/ps5taycam.jpg" alt="PS5 Controller">
+                <div class="featured-product-info">
+                    <p class="product-name">PlayStation 5 Console</p>
+                    <p class="product-price">
+                        <span>14,990,000đ</span>
+                    </p>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+
+@* ================================================== *@
+@* === PHẦN 2: DANH SÁCH SẢN PHẨM (Giao diện mới) === *@
+@* ================================================== *@
+<div class="product-page-container">
+
+    @* --- Breadcrumb (Thanh điều hướng) --- *@
+    <nav class="breadcrumb">
+        <a asp-controller="Home" asp-action="Index">Trang chủ</a>
+        <span>/</span>
+        <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
+        <span>/</span>
+        <strong>Máy Game</strong>
+    </nav>
+
+    @* --- Tiêu đề trang --- *@
+    <h1 class="page-title">MÁY GAME</h1>
+
+    @* --- Bộ lọc theo loại sản phẩm (Icon) --- *@
+    <div class="category-icon-filter">
+        <h3>Loại</h3>
+        <div class="category-icon-list">
+            <a href="#" class="category-icon-item active">
+                <img src="https://i.imgur.com/rXy2x4j.png" alt="PS5" />
+                <span>PS5</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/rXy2x4j.png" alt="PS4" />
+                <span>PS4</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/bV4B4E7.png" alt="Nintendo" />
+                <span>Nintendo</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/eG1M9dJ.png" alt="Xbox" />
+                <span>Xbox</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/YqN4k3g.png" alt="Handheld PC" />
+                <span>Handheld PC</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/J3Bf2rB.png" alt="Meta Quest" />
+                <span>Meta Quest</span>
+            </a>
+            <a href="#" class="category-icon-item">
+                <img src="https://i.imgur.com/nJ5g9mC.png" alt="Retro" />
+                <span>Retro</span>
+            </a>
+        </div>
+    </div>
+
+    @* --- Thanh công cụ (Hiển thị, sắp xếp) --- *@
+    <div class="product-toolbar">
+        <div class="product-count-info">
+            Hiển thị 1-12 của @Model.Count() kết quả
+        </div>
+        <div class="product-sort-options">
+            <label for="sort-by">Sắp xếp:</label>
+            <select id="sort-by" name="sort-by">
+                <option value="default">Mặc định</option>
+                <option value="price-asc">Giá tăng dần</option>
+                <option value="price-desc">Giá giảm dần</option>
+            </select>
+        </div>
+    </div>
+
+    @* --- Lưới hiển thị sản phẩm --- *@
+    <div class="product-grid-display">
+        @foreach (var product in Model)
+        {
+            <div class="product-card">
+                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="product-image-link">
+                    @if (product.Status == "Sale")
+                    {
+                        <span class="product-tag tag-sale">Giảm giá</span>
+                    }
+                    <img src="@(product.ImageUrl ?? "/image/default-product.png")" alt="@product.Name">
+                </a>
+                <div class="product-card-content">
+                    <h3><a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">@product.Name</a></h3>
+                    <div class="price">@product.Price.ToString("N0")đ</div>
+                    <button class="add-to-cart-btn">Thêm vào giỏ</button>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>

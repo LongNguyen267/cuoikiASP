@@ -1,0 +1,92 @@
+﻿@using GameStore.Models
+@model List<GameStore.Models.CartItem>
+
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    decimal total = 0;
+    // Tính tổng tiền trước để có thể hiển thị ở bất cứ đâu
+    if (Model != null)
+    {
+        foreach (var item in Model)
+        {
+            if (item.Product != null)
+            {
+                total += item.Product.Price * item.Quantity;
+            }
+        }
+    }
+}
+
+<div class="cart-page-container">
+    <div class="cart-page-header">
+        <h1>Giỏ hàng của bạn</h1>
+        <p>Có @(Model?.Count ?? 0) sản phẩm trong giỏ hàng</p>
+    </div>
+
+    <div class="cart-layout">
+        <main class="cart-main-content">
+            @if (Model == null || Model.Count == 0)
+            {
+                <div class="cart-empty-message">
+                    <p>Giỏ hàng của bạn đang trống</p>
+                </div>
+            }
+            else
+            {
+                <div class="cart-items-list">
+                    @foreach (var item in Model)
+                    {
+                        if (item.Product != null)
+                        {
+                            var subtotal = item.Product.Price * item.Quantity;
+                            // Giữ lại cấu trúc item như cũ, CSS sẽ xử lý giao diện
+                            <div class="cart-item">
+                                <div class="item-image">
+                                    <img src="@(item.Product.ImageUrl ?? "https://via.placeholder.com/150")" alt="@item.Product.Name">
+                                </div>
+                                <div class="item-details">
+                                    <h5>@item.Product.Name</h5>
+                                    <span class="item-price">@item.Product.Price.ToString("N0")đ</span>
+                                </div>
+                                <div class="item-quantity">
+                                    <input type="number" value="@item.Quantity" readonly>
+                                </div>
+                                <div class="item-total-price">
+                                    @subtotal.ToString("N0")đ
+                                </div>
+                                <div class="item-remove">
+                                    <a asp-controller="Cart" asp-action="RemoveFromCart" asp-route-productId="@item.ProductId" class="btn-remove" title="Xóa sản phẩm">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
+        </main>
+
+        <aside class="cart-sidebar">
+            <div class="order-summary-box">
+                <h3>Thông tin đơn hàng</h3>
+                <div class="summary-total">
+                    <span>Tổng tiền:</span>
+                    <span class="total-price">@total.ToString("N0")đ</span>
+                </div>
+                <p class="summary-note">
+                    Phí vận chuyển sẽ được tính ở trang thanh toán.
+                    <br>
+                    Bạn cũng có thể nhập mã giảm giá ở trang thanh toán.
+                </p>
+                <a asp-action="Index" asp-controller="Checkout" class="btn btn-checkout"
+                   style="@((Model == null || Model.Count == 0) ? "pointer-events: none; background-color: #ccc;" : "")">
+                    THANH TOÁN
+                </a>
+                <a asp-controller="Products" asp-action="Index" class="btn-continue-shopping-link">
+                    <i class="fas fa-arrow-left"></i> Tiếp tục mua hàng
+                </a>
+            </div>
+        </aside>
+    </div>
+</div>

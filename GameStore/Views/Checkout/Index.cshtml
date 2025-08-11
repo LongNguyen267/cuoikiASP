@@ -1,0 +1,116 @@
+﻿@model GameStore.ViewModels.CheckoutViewModel
+
+@{
+    ViewData["Title"] = "Thanh toán";
+    // Tính tổng tiền trước để hiển thị ở cột tóm tắt
+    decimal total = Model.CartItems.Sum(item => item.Product.Price * item.Quantity);
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/checkout.css" />
+}
+
+<div class="checkout-page-container">
+    <div class="checkout-page-header">
+        <h1>Thanh toán</h1>
+        <p>Vui lòng kiểm tra thông tin và hoàn tất đơn hàng của bạn.</p>
+    </div>
+
+    @if (Model.CartItems.Count == 0)
+    {
+        <div class="checkout-empty-message">
+            <p>Giỏ hàng của bạn đang trống. Không thể tiến hành thanh toán.</p>
+            <a asp-controller="Products" asp-action="Index" class="btn-continue-shopping">Tiếp tục mua sắm</a>
+        </div>
+    }
+    else
+    {
+        <form asp-controller="Checkout" asp-action="PlaceOrder" method="post" id="checkout-form">
+            <div class="checkout-layout">
+
+                <div class="customer-details">
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-shipping-fast"></i> Thông tin giao hàng</h3>
+                        <div class="form-group">
+                            <label asp-for="ShippingAddress">Địa chỉ nhận hàng</label>
+                            <input asp-for="ShippingAddress" class="form-control" placeholder="Nhập số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố" />
+                            <span asp-validation-for="ShippingAddress" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="PhoneNumber">Số điện thoại</label>
+                            <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại của bạn" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3><i class="fas fa-credit-card"></i> Phương thức thanh toán</h3>
+                        <div class="payment-methods">
+                            <label class="payment-method-box">
+                                <input type="radio" name="paymentMethod" value="COD" checked />
+                                <div class="payment-method-content">
+                                    <i class="fas fa-hand-holding-usd"></i>
+                                    <span>Thanh toán khi nhận hàng (COD)</span>
+                                </div>
+                            </label>
+                            <label class="payment-method-box">
+                                <input type="radio" name="paymentMethod" value="Online" />
+                                <div class="payment-method-content">
+                                    <i class="fas fa-qrcode"></i>
+                                    <span>Thanh toán trực tuyến (QR Code)</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-summary">
+                    <div class="order-summary-box">
+                        <h3>Tóm tắt đơn hàng</h3>
+                        <ul class="order-items-list">
+                            @foreach (var item in Model.CartItems)
+                            {
+                                <li class="order-item">
+                                    <img src="@(item.Product.ImageUrl ?? "https://via.placeholder.com/100")" alt="@item.Product.Name" class="item-image" />
+                                    <div class="item-info">
+                                        <span class="item-name">@item.Product.Name</span>
+                                        <span class="item-quantity">Số lượng: @item.Quantity</span>
+                                    </div>
+                                    <span class="item-price">@((item.Product.Price * item.Quantity).ToString("N0"))đ</span>
+                                </li>
+                            }
+                        </ul>
+
+                        <div class="order-total">
+                            <div class="total-row">
+                                <span>Tạm tính</span>
+                                <span>@total.ToString("N0")đ</span>
+                            </div>
+                            <div class="total-row">
+                                <span>Phí vận chuyển</span>
+                                <span>Miễn phí</span>
+                            </div>
+                            <div class="total-row grand-total">
+                                <span>Tổng cộng</span>
+                                <span class="final-price">@total.ToString("N0")đ</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-place-order">
+                            <i class="fas fa-lock"></i>
+                            Hoàn tất đặt hàng
+                        </button>
+                        <a asp-controller="Cart" asp-action="Index" class="back-to-cart-link">
+                            <i class="fas fa-arrow-left"></i> Quay lại giỏ hàng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
