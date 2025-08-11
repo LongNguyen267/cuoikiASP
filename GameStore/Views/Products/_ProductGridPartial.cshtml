@@ -1,0 +1,23 @@
+﻿@model IEnumerable<GameStore.Models.Product>
+
+<div class="product-grid-display">
+    @foreach (var product in Model)
+    {
+        <div class="product-card">
+            <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="product-image-link">
+                @if (!string.IsNullOrEmpty(product.Status) && product.Status.Equals("Sale", StringComparison.OrdinalIgnoreCase))
+                {
+                    <span class="product-tag tag-sale">Giảm giá</span>
+                }
+                <img src="@Url.Content(product.ImageUrl ?? "~/image/default-product.png")" alt="@product.Name">
+            </a>
+            <div class="product-card-content">
+                <h3><a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">@product.Name</a></h3>
+                <div class="price">@product.Price.ToString("N0")đ</div>
+                <button class="add-to-cart-btn">Thêm vào giỏ</button>
+            </div>
+        </div>
+    }
+</div>
+
+</div>

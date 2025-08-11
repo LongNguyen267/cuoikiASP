@@ -38,8 +38,6 @@ namespace GameStore.Controllers
         {
             var cart = GetCart();
 
-            // Lấy thông tin sản phẩm đầy đủ từ database để hiển thị
-            // Đây là lúc chúng ta gán đối tượng Product vào
             foreach (var item in cart)
             {
                 item.Product = _context.Products.Find(item.ProductId);

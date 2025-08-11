@@ -45,8 +45,6 @@
         <a asp-controller="Home" asp-action="Index">Trang chủ</a>
         <span>/</span>
         <a asp-controller="Products" asp-action="Index">Sản phẩm</a>
-        <span>/</span>
-        <strong>Máy Game</strong>
     </nav>
 
     @* --- Tiêu đề trang --- *@
@@ -56,31 +54,32 @@
     <div class="category-icon-filter">
         <h3>Loại</h3>
         <div class="category-icon-list">
-            <a href="#" class="category-icon-item active">
+
+            <a asp-controller="Products" asp-action="Index" class="category-icon-item">
+                <img src="https://i.imgur.com/example-all-icon.png" alt="Tất cả" /> <span>Tất cả</span>
+            </a>
+
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="PS5" class="category-icon-item">
                 <img src="https://i.imgur.com/rXy2x4j.png" alt="PS5" />
                 <span>PS5</span>
             </a>
-            <a href="#" class="category-icon-item">
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="PS4" class="category-icon-item">
                 <img src="https://i.imgur.com/rXy2x4j.png" alt="PS4" />
                 <span>PS4</span>
             </a>
-            <a href="#" class="category-icon-item">
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="Nintendo" class="category-icon-item">
                 <img src="https://i.imgur.com/bV4B4E7.png" alt="Nintendo" />
                 <span>Nintendo</span>
             </a>
-            <a href="#" class="category-icon-item">
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="Xbox" class="category-icon-item">
                 <img src="https://i.imgur.com/eG1M9dJ.png" alt="Xbox" />
                 <span>Xbox</span>
             </a>
-            <a href="#" class="category-icon-item">
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="Handheld PC" class="category-icon-item">
                 <img src="https://i.imgur.com/YqN4k3g.png" alt="Handheld PC" />
                 <span>Handheld PC</span>
             </a>
-            <a href="#" class="category-icon-item">
-                <img src="https://i.imgur.com/J3Bf2rB.png" alt="Meta Quest" />
-                <span>Meta Quest</span>
-            </a>
-            <a href="#" class="category-icon-item">
+            <a asp-controller="Products" asp-action="Index" asp-route-searchQuery="Miyoo" class="category-icon-item">
                 <img src="https://i.imgur.com/nJ5g9mC.png" alt="Retro" />
                 <span>Retro</span>
             </a>
@@ -90,7 +89,7 @@
     @* --- Thanh công cụ (Hiển thị, sắp xếp) --- *@
     <div class="product-toolbar">
         <div class="product-count-info">
-            Hiển thị 1-12 của @Model.Count() kết quả
+            Hiển thị @Model.Count() kết quả
         </div>
         <div class="product-sort-options">
             <label for="sort-by">Sắp xếp:</label>
@@ -102,25 +101,69 @@
         </div>
     </div>
 
-    @* --- Lưới hiển thị sản phẩm --- *@
-    <div class="product-grid-display">
-        @foreach (var product in Model)
-        {
-            <div class="product-card">
-                <a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id" class="product-image-link">
-                    @if (product.Status == "Sale")
-                    {
-                        <span class="product-tag tag-sale">Giảm giá</span>
-                    }
-                    <img src="@(product.ImageUrl ?? "/image/default-product.png")" alt="@product.Name">
-                </a>
-                <div class="product-card-content">
-                    <h3><a asp-controller="Products" asp-action="Details" asp-route-id="@product.Id">@product.Name</a></h3>
-                    <div class="price">@product.Price.ToString("N0")đ</div>
-                    <button class="add-to-cart-btn">Thêm vào giỏ</button>
-                </div>
-            </div>
-        }
+@* --- Lưới hiển thị sản phẩm --- *@
+    <div id="productGridContainer">
+        @await Html.PartialAsync("_ProductGridPartial", Model)
     </div>
+@section Scripts {
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Lấy các element cần thiết
+                const filterLinks = document.querySelectorAll('.category-icon-item');
+                const sortSelect = document.getElementById('sort-by');
+                const productGridContainer = document.getElementById('productGridContainer');
+                const productCountInfo = document.querySelector('.product-count-info');
 
-</div>
+                // Lưu trữ trạng thái lọc và sắp xếp hiện tại
+                let currentSearchQuery = '';
+                let currentSortOrder = 'default';
+
+                // Hàm chính để gọi AJAX và cập nhật sản phẩm
+                function fetchProducts() {
+                    // Xây dựng URL với cả hai tham số
+                    let url = `@Url.Action("Index", "Products")?searchQuery=${encodeURIComponent(currentSearchQuery)}&sortOrder=${currentSortOrder}`;
+
+                    fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.text())
+                    .then(html => {
+                        // Cập nhật lại lưới sản phẩm
+                        productGridContainer.innerHTML = html;
+
+                        // Cập nhật lại số lượng kết quả (bonus)
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = html;
+                        const count = tempDiv.querySelectorAll('.product-card').length;
+                        productCountInfo.textContent = `Hiển thị ${count} kết quả`;
+                    })
+                    .catch(error => console.error('Error fetching products:', error));
+                }
+
+                // Gán sự kiện cho các nút lọc
+                filterLinks.forEach(link => {
+                    link.addEventListener('click', function (event) {
+                        event.preventDefault();
+
+                        // Cập nhật searchQuery và gọi hàm fetch
+                        const url = new URL(this.href);
+                        currentSearchQuery = url.searchParams.get('searchQuery') || '';
+                        fetchProducts();
+
+                        // Cập nhật trạng thái 'active'
+                        filterLinks.forEach(l => l.classList.remove('active'));
+                        this.classList.add('active');
+                    });
+                });
+
+                // Gán sự kiện cho dropdown sắp xếp
+                sortSelect.addEventListener('change', function () {
+                    // Cập nhật sortOrder và gọi hàm fetch
+                    currentSortOrder = this.value;
+                    fetchProducts();
+                });
+            });
+        </script>
+}
